@@ -5,11 +5,25 @@
 #include <iomanip>
 #include <math.h>
 
+int readFile(std::string fileName) {
+    std::ifstream file(fileName);
+
+    std::string line;
+    std::string format;
+    int width, height;
+
+    //TODO: substitute for try/catch later
+    if (file.is_open()) {
+
+    }
+    return 1;
+}
 
 int main(int argc, char const *argv[])
 {
+    std::cout << argc << std::endl;
     std::string line;
-    std::ifstream myfile2 ("../img/example.pgm");
+    std::ifstream myfile2 ("../img/cat.pgm");
     if (myfile2.is_open())
     {
         std::string fileFormat;
@@ -56,30 +70,48 @@ int main(int argc, char const *argv[])
         }
         std::cout << "total: " << total << std::endl;
 
-        for (int i = 0; i < totalNumber; i++) {
-        //    imgData[i] = histogram[imgData[i]] * 255;
-              imgDataEqua[i] = histogram[imgData[i]] * 255;
-        }
 
-        std::ofstream myfile;
-        myfile.open ("../img/exampleEqualize.pgm");
+ std::ofstream myfile;
+        myfile.open ("../img/catEqualized.pgm");
         myfile << "P2\n";
         myfile << width << " " << height << "\n";
         myfile << 255 << "\n";
 
-        int t = 0;
-        for (int i = 0; i < height; i++) {
-            for (int y = 0; y < width; y++) {
-                myfile << round(imgDataEqua[t])<< " ";
-                if (i + y > 0 && t % 32 == 0 )
+
+        for (int i = 0; i < totalNumber; i++) {
+        //    imgData[i] = histogram[imgData[i]] * 255;
+            //   imgDataEqua[i] = histogram[imgData[i]] * 255;
+              myfile << round(histogram[imgData[i]] * 255) << " ";
+              if (i > 0 && i % 32 == 0 )
                 {
                     myfile << "\n";
                 }
-                t++;
-            }
         }
 
+
         myfile.close();
+
+
+
+        // std::ofstream myfile;
+        // myfile.open ("../img/catEqualize.pgm");
+        // myfile << "P2\n";
+        // myfile << width << " " << height << "\n";
+        // myfile << 255 << "\n";
+
+        // int t = 0;
+        // for (int i = 0; i < height; i++) {
+        //     for (int y = 0; y < width; y++) {
+        //         myfile << round(imgDataEqua[t])<< " ";
+        //         if (i + y > 0 && t % 32 == 0 )
+        //         {
+        //             myfile << "\n";
+        //         }
+        //         t++;
+        //     }
+        // }
+
+        // myfile.close();
     }
 
     else std::cout << "Unable to open file";
