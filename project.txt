@@ -1,0 +1,6 @@
+Project:
+
+Enunciado: https://elearning.uminho.pt/bbcswebdav/pid-924246-dt-content-rid-2292061_1/courses/1920.H507P5_1/PCP5-1%C2%BATrabalhoPCP.pdf
+
+Construir histograma de cor (neste caso só a preto e branco) de uma imagem (com formato pgm).
+
