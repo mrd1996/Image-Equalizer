@@ -4,117 +4,127 @@
 #include <vector>
 #include <iomanip>
 #include <math.h>
+#include<omp.h>
+#include "counters.h"
 
-int readFile(std::string fileName) {
+//TODO: Turn this into an object
+int width, height, intesity;
+
+void readFile(
+    std::string fileName,
+    float histogram[],
+    std::vector<int> &imgData,
+    /** FIXME: to remove later **/
+    std::string &format,
+    int &width,
+    int &height,
+    int &intesity)
+{
     std::ifstream file(fileName);
-
     std::string line;
-    std::string format;
-    int width, height;
 
     //TODO: substitute for try/catch later
     if (file.is_open()) {
+        //first line has the format eg: P2
+        getline (file,line);
+        format = line;
 
-    }
-    return 1;
-}
+        //get next line and check if its a comment
+        getline(file,line);
+        if (line.at(0) == '#') {
+            getline(file,line);
+        }
 
-int main(int argc, char const *argv[])
-{
-    std::cout << argc << std::endl;
-    std::string line;
-    std::ifstream myfile2 ("../img/cat.pgm");
-    if (myfile2.is_open())
-    {
-        std::string fileFormat;
-        int width, height;
-
-        getline (myfile2,line);
-        fileFormat = line;
-
-        getline (myfile2,line);
-
+        //get dimensions eg: 1920 1080
         std::istringstream iss(line);
+        iss >> width;
+        iss >> height;
 
-        std::string s; iss >> s;
-        width = std::stoi(s);
-        // std::cout << s << '\n';
+        //get intesinty eg: 255
+        getline(file,line);
+        iss.clear();
+        iss.str(line);
+        iss >> intesity;
 
-        iss >> s;
-        height = std::stoi(s);
-        // std::cout << s << '\n';
-        int totalNumber = height * width;
-
-        float histogram[256] = {0};
-        std::vector<int> imgData;
-        float imgDataEqua[totalNumber];
-        getline (myfile2,line);
-
-        // for(auto& s: result)
-        //     std::cout << s << '\n';
-        while ( getline (myfile2,line))
-        {
+        //read img data FIXME: possibly move to a function?
+        while (getline(file, line)) {
             std::istringstream iss(line);
-            // std::cout << line << std::endl;
-            for(std::string s; iss >> s; ) {
+            for(std::string s; iss >> s;) {
                 histogram[std::stoi(s)]++ ;
                 imgData.push_back(std::stoi(s));
             }
         }
-        myfile2.close();
-
-        float total = histogram[0] /= totalNumber;
-        for (int i = 1; i <= 255; i++) {
-            total = histogram[i] = total + histogram[i] / totalNumber;
-            // std::cout << i << ": " << histogram[i] << std::endl;
-        }
-        std::cout << "total: " << total << std::endl;
-
-
- std::ofstream myfile;
-        myfile.open ("../img/catEqualized.pgm");
-        myfile << "P2\n";
-        myfile << width << " " << height << "\n";
-        myfile << 255 << "\n";
-
-
-        for (int i = 0; i < totalNumber; i++) {
-        //    imgData[i] = histogram[imgData[i]] * 255;
-            //   imgDataEqua[i] = histogram[imgData[i]] * 255;
-              myfile << round(histogram[imgData[i]] * 255) << " ";
-              if (i > 0 && i % 32 == 0 )
-                {
-                    myfile << "\n";
-                }
-        }
-
-
-        myfile.close();
-
-
-
-        // std::ofstream myfile;
-        // myfile.open ("../img/catEqualize.pgm");
-        // myfile << "P2\n";
-        // myfile << width << " " << height << "\n";
-        // myfile << 255 << "\n";
-
-        // int t = 0;
-        // for (int i = 0; i < height; i++) {
-        //     for (int y = 0; y < width; y++) {
-        //         myfile << round(imgDataEqua[t])<< " ";
-        //         if (i + y > 0 && t % 32 == 0 )
-        //         {
-        //             myfile << "\n";
-        //         }
-        //         t++;
-        //     }
-        // }
-
-        // myfile.close();
     }
+    file.close();
+}
 
-    else std::cout << "Unable to open file";
-    std::cout << "finished" << std::endl;
+void equalizeHistogram(float histogram[], int intesity, int dimension)
+{
+    float total = 0;
+    int intensityPlus = intesity + 1;
+
+    #pragma omp parallel num_threads(1)
+    #pragma omp for
+    for (int i = 0; i <= intesity; i++) {
+            total = (total + histogram[i] / dimension);
+            histogram[i] = round(total * 255);
+    }
+}
+
+void writeFile(
+    std::string fileName,
+    float histogram[],
+    std::vector<int> &imgData,
+    /** FIXME: to remove later **/
+    std::string format,
+    int width,
+    int height,
+    int dimension,
+    int intesity)
+{
+    std::ofstream file;
+    file.open(fileName);
+    if (file.is_open()) {
+        file << format << "\n";
+        file << width << " " << height << "\n";
+        file << intesity << "\n";
+
+        for (int i = 0; i < dimension; i++) {
+            file << histogram[imgData[i]] << " ";
+            //TODO: improve line break (LOW PRIORITY)
+            if (i > 0 && i % 32 == 0 ) {
+                file << "\n";
+            }
+        }
+    }
+    file.close();
+}
+
+void equalizeImage(std::string inFileName) {
+    std::string outFileName = inFileName + "E";
+    std::string format;
+
+    float histogram[256] = {0};
+    std::vector<int> imgData;
+
+    readFile(inFileName, histogram, imgData, format, width, height, intesity);
+
+    int totalNumber = height * width;
+    float imgDataEqua[totalNumber];
+
+    equalizeHistogram(histogram, intesity, totalNumber);
+    writeFile(outFileName, histogram, imgData, format, width, height, totalNumber, intesity);
+}
+
+int main(int argc, char const *argv[])
+{
+    start();
+
+    equalizeImage(argv[1]);
+
+    stop(-1);
+
+    std::cout << "Dimensions w: " << width << " h:" << height << std::endl;
+    printResults();
     return 0;
 }

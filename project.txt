@@ -4,3 +4,7 @@ Enunciado: https://elearning.uminho.pt/bbcswebdav/pid-924246-dt-content-rid-2292
 
 Construir histograma de cor (neste caso só a preto e branco) de uma imagem (com formato pgm).
 
+g++ histogram.cpp counters.cpp -o histogram && ./histogram a
+
+Melhorias Codigo Sequancial:
+    . Usar apontadores no imgData and imgDataEqua
