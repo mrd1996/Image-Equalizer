@@ -4,13 +4,40 @@
 #include <vector>
 #include <iomanip>
 #include <math.h>
-#include<omp.h>
+#include <omp.h>
 #include "counters.h"
-
+//miss por instruçao
 //TODO: Turn this into an object
 int width, height, intesity;
 
-void readFile(
+void parallelRead(std::ifstream &file, float histogram[], std::vector<int> &imgData)
+{
+    std::string line;
+
+    // #pragma omp parallel num_threads(4)
+    while (getline(file, line)) {
+        float section[256];
+        std::istringstream iss(line);
+        for(std::string s; iss >> s;) {
+            histogram[std::stoi(s)]++ ;
+            imgData.push_back(std::stoi(s));
+        }
+    }
+}
+
+// void buildHistogram(float histogram[], std::vector<int> &imgData)
+// {
+//     float hist[256] = {0};
+//     #pragma omp parallel for reduction(+:hist)
+//     for (int i = 0; i < imgData.size(); i++) {
+//         // std::cout << "imgData: " << imgData.size()  << std::endl;
+//         hist[imgData[i]]++;
+//     }
+//     std::cout << "hist: " << hist[0] << std::endl;
+//     histogram = hist;
+// }
+
+void readFileHist(
     std::string fileName,
     float histogram[],
     std::vector<int> &imgData,
@@ -46,14 +73,16 @@ void readFile(
         iss.str(line);
         iss >> intesity;
 
-        //read img data FIXME: possibly move to a function?
+        // parallelRead(file, histogram, imgData);
+
         while (getline(file, line)) {
+            float section[256];
             std::istringstream iss(line);
             for(std::string s; iss >> s;) {
-                histogram[std::stoi(s)]++ ;
                 imgData.push_back(std::stoi(s));
             }
         }
+
     }
     file.close();
 }
@@ -63,8 +92,8 @@ void equalizeHistogram(float histogram[], int intesity, int dimension)
     float total = 0;
     int intensityPlus = intesity + 1;
 
-    #pragma omp parallel num_threads(1)
-    #pragma omp for
+    // #pragma omp parallel num_threads(1)
+    // #pragma omp for
     for (int i = 0; i <= intesity; i++) {
             total = (total + histogram[i] / dimension);
             histogram[i] = round(total * 255);
@@ -104,25 +133,36 @@ void equalizeImage(std::string inFileName) {
     std::string outFileName = inFileName + "E";
     std::string format;
 
-    float histogram[256] = {0};
+    float histogram[256] = {0}; //FIXME:
     std::vector<int> imgData;
 
-    readFile(inFileName, histogram, imgData, format, width, height, intesity);
+    readFileHist(inFileName, histogram, imgData, format, width, height, intesity);
+
+    start();
+
+    // buildHistogram(histogram, imgData);
+    #pragma omp parallel for reduction(+:histogram)
+    for (int i = 0; i < imgData.size(); i++) {
+        histogram[imgData[i]]++;
+    }
 
     int totalNumber = height * width;
     float imgDataEqua[totalNumber];
 
     equalizeHistogram(histogram, intesity, totalNumber);
+
+    stop(-1);
+
     writeFile(outFileName, histogram, imgData, format, width, height, totalNumber, intesity);
 }
 
 int main(int argc, char const *argv[])
 {
-    start();
+    // start();
 
     equalizeImage(argv[1]);
 
-    stop(-1);
+    // stop(-1);
 
     std::cout << "Dimensions w: " << width << " h:" << height << std::endl;
     printResults();
