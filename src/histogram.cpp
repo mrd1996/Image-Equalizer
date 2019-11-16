@@ -100,6 +100,20 @@ void equalizeHistogram(float histogram[], int intesity, int dimension)
     }
 }
 
+void createImage(
+    int newimg[],
+    std::vector<int> &imgData,
+    float histogram[],
+    int dimension
+)
+{
+    #pragma omp for
+    for (int i = 0; i < dimension; i++) {
+            newimg[i] = histogram[imgData[i]];
+            //TODO: improve line break (LOW PRIORITY)
+    }
+}
+
 void writeFile(
     std::string fileName,
     float histogram[],
@@ -138,6 +152,8 @@ void equalizeImage(std::string inFileName) {
 
     readFileHist(inFileName, histogram, imgData, format, width, height, intesity);
 
+    int totalNumber = height * width;
+    int newimg[totalNumber];
     start();
 
     // buildHistogram(histogram, imgData);
@@ -146,14 +162,14 @@ void equalizeImage(std::string inFileName) {
         histogram[imgData[i]]++;
     }
 
-    int totalNumber = height * width;
-    float imgDataEqua[totalNumber];
+    std::cout << "total number: " << totalNumber << std::endl;
 
     equalizeHistogram(histogram, intesity, totalNumber);
+    createImage(newimg, imgData, histogram, totalNumber);
 
     stop(-1);
 
-    writeFile(outFileName, histogram, imgData, format, width, height, totalNumber, intesity);
+    // writeFile(outFileName, histogram, imgData, format, width, height, totalNumber, intesity);
 }
 
 int main(int argc, char const *argv[])
