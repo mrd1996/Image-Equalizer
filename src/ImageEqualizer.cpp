@@ -1,3 +1,10 @@
+/**
+ * This file contains the algorithm for image equalization
+ *
+ * There are comments about CPU TIME. that corresponds to the percentage of time
+ * the algorithm took on that section of code for a image of size 10.000 x 10.000
+ *
+ */
 #include <vector>
 #include <math.h>
 #include <omp.h>
@@ -21,6 +28,8 @@ ImageEqualizer::ImageEqualizer(std::vector<int> imgData, int intensity, long int
 
 /**
  * @brief Creates equalized histogram
+ *
+ * CPU TIME: 0.1%
  *
  * NOTE: This part of the code was not parallelized
  * because its parallelization is not trivial
@@ -50,6 +59,8 @@ void ImageEqualizer::equalizeHistogram() {
 /**
  * @brief Builds image based on equalized histogram
  *
+ * CPU TIME: 71.4%
+ *
  * NOTE: One major hotspot since it looped
  * trough the whole area of the image. We tried various
  * approaches eg: schedule (static|dynamic|guided, 16)
@@ -66,6 +77,8 @@ void ImageEqualizer::buildImage() {
 
 /**
  * @brief Builds histogram from image provided
+ *
+ * CPU TIME: 28.5%
  *
  * NOTE: One major hotspot since it looped
  * trough the whole area of the image.
