@@ -107,6 +107,7 @@ int main(int argc, char const *argv[])
     } else {
         int dimension = std::atoi(argv[1]);
         imgData = std::vector<int>(dimension);
+        #pragma omp parallel for
         for (auto i = 0; i < dimension; i++){
             imgData[i] = rand() % 256;
         }
