@@ -39,7 +39,7 @@ void test(
     bool store = false
 ) {
     std::vector<int> imgEqualized;
-    int dimension = width * height;
+    long int dimension = width * height;
     for (auto const& thread : threads) {
         for (int i = 0; i < iterations; i++) {
             ImageEqualizer hist(imgData, intensity, dimension, thread);
@@ -68,7 +68,7 @@ int main(int argc, char const *argv[])
     std:: string infile = argv[1];
     std::vector<int> threads{2, 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 38, 40};
     bool print = false;
-    int iterations = 5;
+    int iterations = 20;
 
     bool foundThread = true;
     bool readImage = true;
@@ -105,13 +105,13 @@ int main(int argc, char const *argv[])
     if (readImage) {
         imgMngr.readImage(infile, imgData, format, width, height, intensity);
     } else {
-        int dimension = std::atoi(argv[1]);
+        int dimension = std::atoi(argv[1]) * std::atoi(argv[1]);
         imgData = std::vector<int>(dimension);
-        #pragma omp parallel for
+        // #pragma omp parallel for schedule(static, 64)
         for (auto i = 0; i < dimension; i++){
             imgData[i] = rand() % 256;
         }
-        width = sqrt(dimension);
+        width = std::atoi(argv[1]);
         height = width;
         intensity = 255;
         outfile = "gen.pgm";

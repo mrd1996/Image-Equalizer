@@ -11,7 +11,7 @@
  * @param dimension // area of image width * height
  * @param threads //number of threads to use on the algorithm
  */
-ImageEqualizer::ImageEqualizer(std::vector<int> imgData, int intensity, int dimension, int threads):
+ImageEqualizer::ImageEqualizer(std::vector<int> imgData, int intensity, long int dimension, int threads):
     imgData(imgData),
     intesity(intensity),
     dimension(dimension),
@@ -59,7 +59,7 @@ void ImageEqualizer::equalizeHistogram() {
  */
 void ImageEqualizer::buildImage() {
     #pragma omp parallel for num_threads(threads)
-    for (int i = 0; i < dimension; i++) {
+    for (long int i = 0; i < dimension; i++) {
         imgEqualized[i] = histogram[imgData[i]];
     }
 }
@@ -77,7 +77,7 @@ void ImageEqualizer::buildImage() {
  */
 void ImageEqualizer::buildHistogram() {
     #pragma omp parallel for num_threads(threads) reduction(+:histogram[:256])
-    for (int i = 0; i < dimension; i++) {
+    for (long int i = 0; i < dimension; i++) {
         histogram[imgData[i]]++;
     }
 }

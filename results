@@ -1,3 +1,0 @@
-sequencial: 456121 usecs
-4 threads:  261811 usecs -> breaks image
-sub -I -qcpar -lnodes=r662:ppn=40 -lwalltime=1:00:00 -qcpar
