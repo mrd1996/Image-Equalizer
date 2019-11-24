@@ -4,6 +4,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <iostream>
+#include <math.h>
 
 #include "Counters.h"
 #include "ImageEqualizer.h"
@@ -61,14 +62,16 @@ int main(int argc, char const *argv[])
 {
     if (argc == 1)
     {
-        std::cout  << "USAGE:\n equalizer \e[1mimagepath\e[0m [thread ...] [-print] [-it=<iterations>]" << std::endl;
+        std::cout  << "USAGE:\n equalizer \e[1mimagepath\e[0m [thread ...] [-print] [-gen] [-it=<iterations>]" << std::endl;
         exit(1);
     }
+    std:: string infile = argv[1];
     std::vector<int> threads{2, 4, 6, 8, 10, 12, 16, 20, 24, 28, 32, 38, 40};
     bool print = false;
-    int iterations = 20;
+    int iterations = 5;
 
     bool foundThread = true;
+    bool readImage = true;
 
     if (argc > 2) {
         for (int i = 2; i < argc; ++i) {
@@ -82,6 +85,10 @@ int main(int argc, char const *argv[])
                 iterations = std::stoi(it.substr(pos+4));
                 continue;
             }
+            if ((std::string) argv[i] == "-gen") {
+                readImage = false;
+                continue;
+            }
             if (foundThread) {
                 threads.clear();
                 foundThread = false;
@@ -90,13 +97,24 @@ int main(int argc, char const *argv[])
         }
     }
 
-    std:: string infile = argv[1];
     outfile = infile + "E";
     std::string format;
     int width, height, intensity;
     std::vector<int> imgData;
 
-    imgMngr.readImage(infile, imgData, format, width, height, intensity);
+    if (readImage) {
+        imgMngr.readImage(infile, imgData, format, width, height, intensity);
+    } else {
+        int dimension = std::atoi(argv[1]);
+        imgData = std::vector<int>(dimension);
+        for (auto i = 0; i < dimension; i++){
+            imgData[i] = rand() % 256;
+        }
+        width = sqrt(dimension);
+        height = width;
+        intensity = 255;
+        outfile = "gen.pgm";
+    }
 
     int dimension = height * width;
     test(imgData, intensity, width, height, iterations, threads, print);
