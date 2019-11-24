@@ -31,3 +31,12 @@ equalizer img/example.pgm 4 8 -it=2 -print #only writes last image equalized
 ```bash
 equalizer 30 10 -gen -it=2 -print
 ```
+
+## FILES
+[ImageEqualizer.cpp](./src/ImageEqualizer.cpp) -  Implementation of image equalization algorithm
+
+[AlgoTester.cpp](./src/AlgoTester.cpp) - File that contains our Main function
+
+[ImageManager.cpp](./src/ImageManager.cpp) - Class that contains the IO functions
+
+[Counters.cpp](./src/Counters.cpp) - Class that contains time measurement functions
