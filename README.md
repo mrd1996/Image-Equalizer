@@ -32,7 +32,7 @@ equalizer img/example.pgm 4 8 -it=2 -print #only writes last image equalized
 equalizer 30 10 -gen -it=2 -print
 ```
 
-## FILES
+## Files
 [ImageEqualizer.cpp](./src/ImageEqualizer.cpp) -  Implementation of image equalization algorithm
 
 [AlgoTester.cpp](./src/AlgoTester.cpp) - File that contains our Main function
