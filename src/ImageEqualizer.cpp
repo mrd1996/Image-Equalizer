@@ -1,8 +1,10 @@
 /**
  * This file contains the algorithm for image equalization
  *
- * There are comments about CPU TIME. that corresponds to the percentage of time
- * the algorithm took on that section of code for a image of size 10.000 x 10.000
+ * There are comments about CPU TIME.
+ * CPU TIME corresponds to the percentage of time the algorithm took
+ * on that section of code for a image of size 10.000 x 10.000.
+ * That data was taken from Intel's proffiling tool Vtune Amplifier.
  *
  */
 #include <vector>
